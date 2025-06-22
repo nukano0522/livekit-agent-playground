@@ -1,22 +1,23 @@
 import {
   ControlBar,
-  GridLayout,
-  ParticipantTile,
   RoomAudioRenderer,
   useParticipants,
-  useTracks,
+  useConnectionState,
+  ConnectionState,
+  useLocalParticipant,
 } from '@livekit/components-react'
-import { Track } from 'livekit-client'
+import { useEffect } from 'react'
 
 export function VoiceAssistant() {
   const participants = useParticipants()
-  const tracks = useTracks(
-    [
-      { source: Track.Source.Camera, withPlaceholder: false },
-      { source: Track.Source.ScreenShare, withPlaceholder: false },
-    ],
-    { onlySubscribed: false }
-  )
+  const connectionState = useConnectionState()
+  const localParticipant = useLocalParticipant()
+
+  useEffect(() => {
+    console.log('Connection state:', connectionState)
+    console.log('Participants:', participants.length)
+    console.log('Local participant:', localParticipant.localParticipant?.identity)
+  }, [connectionState, participants, localParticipant])
 
   return (
     <div className="voice-assistant">
@@ -24,22 +25,33 @@ export function VoiceAssistant() {
       
       <div className="assistant-status">
         <h2>Voice Assistant Status</h2>
+        
+        <div className="connection-status">
+          <p>Connection: {connectionState}</p>
+        </div>
+
         <div className="participants">
           <h3>Participants ({participants.length})</h3>
           {participants.map((participant) => (
             <div key={participant.sid} className="participant-info">
-              <span className="participant-name">{participant.name || participant.identity}</span>
+              <span className="participant-name">
+                {participant.name || participant.identity}
+                {participant.isLocal && ' (You)'}
+              </span>
               <span className="participant-status">
                 {participant.isSpeaking ? '🔊 Speaking' : '🔇 Silent'}
+                {participant.isMicrophoneEnabled ? '' : ' (Muted)'}
               </span>
             </div>
           ))}
         </div>
-      </div>
 
-      <GridLayout tracks={tracks} style={{ height: 'calc(100% - 150px)' }}>
-        <ParticipantTile />
-      </GridLayout>
+        {connectionState === ConnectionState.Connected && participants.length < 2 && (
+          <div className="waiting-message">
+            <p>Waiting for agent to join...</p>
+          </div>
+        )}
+      </div>
 
       <ControlBar 
         controls={{

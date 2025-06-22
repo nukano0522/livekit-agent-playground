@@ -1,6 +1,6 @@
 import { LiveKitRoom } from '@livekit/components-react'
 import '@livekit/components-styles'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import './App.css'
 import { TokenGenerator } from './components/TokenGenerator'
 import { VoiceAssistant } from './components/VoiceAssistant'
@@ -8,17 +8,37 @@ import { VoiceAssistant } from './components/VoiceAssistant'
 const serverUrl = import.meta.env.VITE_LIVEKIT_URL || 'ws://localhost:7880'
 
 function App() {
-  const [roomName] = useState('agent-test-room')
-  const [participantName] = useState('web-user')
+  const [roomName, setRoomName] = useState('')
+  const [participantName] = useState(() => `web-user-${Date.now()}`)
   const [connected, setConnected] = useState(false)
   const [token, setToken] = useState<string>('')
+  const [key, setKey] = useState(0)
 
   const handleTokenGenerated = useCallback((newToken: string) => {
     setToken(newToken)
   }, [])
 
+  const handleConnect = useCallback(() => {
+    // Generate new room name for each connection
+    const newRoomName = `agent-room-${Date.now()}`
+    setRoomName(newRoomName)
+    setConnected(true)
+  }, [])
+
   const handleDisconnect = useCallback(() => {
     setConnected(false)
+    setToken('')
+    setRoomName('')
+    // Force re-render of TokenGenerator to generate new token
+    setKey(prev => prev + 1)
+  }, [])
+
+  useEffect(() => {
+    // Reset connection state when unmounting
+    return () => {
+      setConnected(false)
+      setToken('')
+    }
   }, [])
 
   return (
@@ -27,17 +47,23 @@ function App() {
       
       {!connected && (
         <div className="connect-section">
+          <button 
+            onClick={handleConnect}
+          >
+            Connect to Agent
+          </button>
+        </div>
+      )}
+
+      {connected && !token && (
+        <div className="connect-section">
           <TokenGenerator 
+            key={key}
             roomName={roomName}
             participantName={participantName}
             onTokenGenerated={handleTokenGenerated}
           />
-          <button 
-            onClick={() => setConnected(true)}
-            disabled={!token}
-          >
-            {token ? 'Connect to Agent' : 'Generating token...'}
-          </button>
+          <p>Generating token for room: {roomName}</p>
         </div>
       )}
 
