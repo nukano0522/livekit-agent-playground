@@ -1,61 +1,93 @@
 # CLAUDE.md
-Response with Japanese.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+日本語で応答してください。
 
 ## Project Overview
 
-This is a LiveKit voice AI agent playground that implements a voice assistant using OpenAI's models for speech-to-text, language processing, and text-to-speech.
+LiveKit音声AIエージェントのプレイグラウンド。WebクライアントとPythonエージェントがLiveKit経由でリアルタイム音声通信を実現します。WSL2環境でも動作可能。
 
 ## Key Dependencies
 
-- **livekit-agents==1.1.3** - Core LiveKit agents framework
-- **livekit-plugins-openai==1.1.3** - OpenAI integration for STT/TTS/LLM
-- **livekit-plugins-silero==1.1.3** - Voice Activity Detection (VAD)
-- **livekit-plugins-turn-detector==1.1.3** - Conversation turn detection
-- **livekit-plugins-noise-cancellation==0.2.4** - Audio noise cancellation
+### Python
+- `livekit-agents[deepgram,openai,cartesia,silero,turn-detector]~=1.0`
+- `livekit-plugins-noise-cancellation~=0.2`
+- `python-dotenv`
 
-## Environment Setup
+注意: README.mdには具体的なバージョン（1.1.3）が記載されているが、requirements.txtは柔軟なバージョン指定を使用
 
-The project uses a `.env` file with the following required variables:
-- `OPENAI_API_KEY` - Your OpenAI API key
-- `LIVEKIT_API_KEY` - LiveKit API key (default: "devkey" for local dev)
-- `LIVEKIT_API_SECRET` - LiveKit API secret (default: "secret" for local dev)
-- `LIVEKIT_URL` - LiveKit server URL (default: "http://localhost:7880/")
+### JavaScript/TypeScript (web-client)
+- React 19.1.0
+- TypeScript 5.8.3
+- Vite 6.3.5
+- @livekit/components-react, livekit-client, livekit-server-sdk
 
 ## Common Commands
 
-### Running the Agent
+### 開発環境の起動（3つのコンポーネントを順番に）
+
 ```bash
+# 1. LiveKitサーバー
+curl -sSL https://get.livekit.io | bash  # 初回のみ
+livekit-server --dev
+
+# 2. Pythonエージェント
 python agent.py dev
+
+# 3. Webクライアント
+cd web-client
+npm run dev
 ```
 
-### Managing Dependencies
-Since there's no requirements.txt file, create one if needed:
+### Webクライアントのコマンド
+
 ```bash
-pip freeze > requirements.txt
+cd web-client
+npm run lint     # ESLintでコードチェック
+npm run build    # プロダクションビルド
+npm run preview  # ビルド後のプレビュー
 ```
 
-### Known Issues
+### 依存関係のインストール
 
-1. **WSL Audio Support**: The agent requires audio input/output which doesn't work by default in WSL. Users need to either:
-   - Run on native Windows/Mac/Linux
-   - Set up WSL audio passthrough (complex)
-   - Deploy to cloud where audio is handled differently
+```bash
+# Python
+pip install -r requirements.txt
 
-2. **PortAudio Dependencies**: On Ubuntu/Debian systems, install:
-   ```bash
-   sudo apt-get update && sudo apt-get install -y portaudio19-dev python3-pyaudio
-   ```
+# Ubuntu/Debian系での音声処理用パッケージ
+sudo apt-get update && sudo apt-get install -y portaudio19-dev python3-pyaudio
+
+# JavaScript
+cd web-client && npm install
+```
 
 ## Architecture
 
-The codebase follows a simple single-file architecture:
-- `agent.py` - Main entry point containing:
-  - `Assistant` class - Extends LiveKit's Agent base class
-  - `entrypoint` function - Sets up the agent session with AI services
-  - CLI runner - Uses LiveKit's built-in CLI for development
+### 通信フロー
+1. Webクライアント（React）がブラウザのマイクから音声入力を取得
+2. LiveKitサーバー（ws://localhost:7880）経由でPythonエージェントに転送
+3. Pythonエージェントが音声処理パイプラインで応答生成：
+   - STT (OpenAI Whisper): 音声→テキスト
+   - LLM (GPT-4o-mini): AI応答生成
+   - TTS (OpenAI): テキスト→音声
+4. 生成された音声をWebクライアントで再生
 
-The agent uses LiveKit's session-based architecture where:
-1. An `AgentSession` is configured with various AI services (STT, LLM, TTS, VAD)
-2. The session connects to a LiveKit room
-3. The agent responds to user voice input with AI-generated responses
+### 主要ファイル
+- `agent.py`: メインエージェント実装（Assistant class）
+- `agent-rag.py`: RAG対応の別実装
+- `web-client/src/App.tsx`: クライアントのメインコンポーネント
+- `web-client/src/components/TokenGenerator.tsx`: JWT認証トークン生成
+- `web-client/src/components/VoiceAssistant.tsx`: 音声対話UI
+
+### ポート使用
+- 3000: Webクライアント（Vite開発サーバー）
+- 7880: LiveKit WebSocket
+- 7881: Turn/STUN
+- 7882/udp: WebRTC メディア転送
+
+## Known Issues
+
+1. **WSL2環境**: 直接音声入出力ができないため、必ずWebクライアント経由で使用
+2. **テストの欠如**: 現在、Python/JavaScript両方でテストが実装されていない
+3. **CI/CD未設定**: 自動ビルド・デプロイの仕組みがない
