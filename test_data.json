@@ -1,0 +1,51 @@
+{
+  "company_info": {
+    "name": "株式会社ライブキット",
+    "founded": "2020年",
+    "headquarters": "東京都渋谷区",
+    "employees": "150名",
+    "services": [
+      "リアルタイム音声・ビデオ通信プラットフォーム",
+      "AIエージェント開発フレームワーク",
+      "WebRTCインフラストラクチャ"
+    ]
+  },
+  "products": [
+    {
+      "name": "LiveKit Cloud",
+      "description": "マネージドWebRTCプラットフォーム",
+      "features": [
+        "自動スケーリング",
+        "グローバルエッジネットワーク",
+        "99.95% SLA保証"
+      ],
+      "pricing": "1分あたり0.0025ドルから"
+    },
+    {
+      "name": "LiveKit Agents",
+      "description": "AI音声エージェント開発フレームワーク",
+      "supported_models": [
+        "OpenAI GPT-4",
+        "Anthropic Claude",
+        "Google Gemini"
+      ],
+      "use_cases": [
+        "カスタマーサポート",
+        "音声アシスタント",
+        "リアルタイム翻訳"
+      ]
+    }
+  ],
+  "technical_specs": {
+    "protocols": ["WebRTC", "WebSocket", "gRPC"],
+    "supported_platforms": ["Web", "iOS", "Android", "Unity", "Flutter"],
+    "programming_languages": ["JavaScript", "TypeScript", "Python", "Go", "Rust"],
+    "max_participants_per_room": 1000,
+    "latency": "< 100ms globally"
+  },
+  "support": {
+    "documentation": "https://docs.livekit.io",
+    "community": "Discord、GitHub Discussions",
+    "enterprise": "24/7サポート、専任のカスタマーサクセスマネージャー"
+  }
+}
