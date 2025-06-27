@@ -1,0 +1,149 @@
+{
+  "company_info": {
+    "name": "株式会社ライブキット",
+    "founded": "2020年",
+    "headquarters": "東京都渋谷区",
+    "employees": "150名",
+    "services": [
+      "リアルタイム音声・ビデオ通信プラットフォーム",
+      "AIエージェント開発フレームワーク",
+      "WebRTCインフラストラクチャ"
+    ],
+    "mission": "世界中の開発者がリアルタイムコミュニケーション機能を簡単に実装できるようにする",
+    "values": ["オープンソース", "開発者ファースト", "高品質", "革新的"]
+  },
+  "products": [
+    {
+      "name": "LiveKit Cloud",
+      "description": "マネージドWebRTCプラットフォーム",
+      "features": [
+        "自動スケーリング",
+        "グローバルエッジネットワーク",
+        "99.95% SLA保証",
+        "エンドツーエンド暗号化",
+        "録画・配信機能",
+        "分析ダッシュボード"
+      ],
+      "pricing": "1分あたり0.0025ドルから",
+      "free_tier": "月間50,000分まで無料",
+      "regions": ["東京", "シンガポール", "ムンバイ", "フランクフルト", "ロンドン", "バージニア", "オレゴン"]
+    },
+    {
+      "name": "LiveKit Agents",
+      "description": "AI音声エージェント開発フレームワーク",
+      "supported_models": [
+        "OpenAI GPT-4",
+        "Anthropic Claude",
+        "Google Gemini",
+        "Llama 3",
+        "Mistral"
+      ],
+      "features": [
+        "リアルタイム音声処理",
+        "マルチモーダル対応",
+        "カスタムプラグイン",
+        "ストリーミングレスポンス",
+        "会話履歴管理"
+      ],
+      "use_cases": [
+        "カスタマーサポート",
+        "音声アシスタント",
+        "リアルタイム翻訳",
+        "教育・トレーニング",
+        "医療相談"
+      ]
+    },
+    {
+      "name": "LiveKit Server",
+      "description": "オープンソースWebRTCサーバー",
+      "license": "Apache 2.0",
+      "features": [
+        "セルフホスト可能",
+        "水平スケーリング",
+        "Kubernetes対応",
+        "カスタマイズ可能",
+        "プラグインアーキテクチャ"
+      ],
+      "deployment_options": ["Docker", "Kubernetes", "Bare Metal", "Cloud VMs"]
+    }
+  ],
+  "technical_specs": {
+    "protocols": ["WebRTC", "WebSocket", "gRPC", "TURN", "STUN"],
+    "supported_platforms": ["Web", "iOS", "Android", "Unity", "Flutter", "React Native", "Electron"],
+    "programming_languages": ["JavaScript", "TypeScript", "Python", "Go", "Rust", "Swift", "Kotlin", "C#"],
+    "max_participants_per_room": 1000,
+    "latency": "< 100ms globally",
+    "video_codecs": ["VP8", "VP9", "H.264", "AV1"],
+    "audio_codecs": ["Opus", "Red", "DTX"],
+    "security": {
+      "encryption": "DTLS-SRTP",
+      "authentication": "JWT",
+      "compliance": ["GDPR", "HIPAA", "SOC2"]
+    }
+  },
+  "support": {
+    "documentation": "https://docs.livekit.io",
+    "community": "Discord、GitHub Discussions",
+    "enterprise": "24/7サポート、専任のカスタマーサクセスマネージャー",
+    "training": "オンサイトトレーニング、ワークショップ",
+    "sla": {
+      "standard": "営業時間内対応",
+      "premium": "24時間以内対応",
+      "enterprise": "1時間以内対応"
+    }
+  },
+  "pricing_details": {
+    "cloud": {
+      "audio": "0.0025ドル/分",
+      "video": "0.005ドル/分",
+      "recording": "0.01ドル/分",
+      "streaming": "0.015ドル/分",
+      "bandwidth": "0.05ドル/GB"
+    },
+    "volume_discounts": [
+      {"minutes": 100000, "discount": "10%"},
+      {"minutes": 500000, "discount": "20%"},
+      {"minutes": 1000000, "discount": "30%"}
+    ]
+  },
+  "integrations": [
+    {
+      "category": "AI/ML",
+      "services": ["OpenAI", "Anthropic", "Google AI", "Hugging Face", "Deepgram", "Assembly AI"]
+    },
+    {
+      "category": "Cloud",
+      "services": ["AWS", "Google Cloud", "Azure", "Cloudflare", "Vercel", "Netlify"]
+    },
+    {
+      "category": "開発ツール",
+      "services": ["GitHub", "GitLab", "Jira", "Slack", "Discord", "Webhook"]
+    }
+  ],
+  "case_studies": [
+    {
+      "company": "株式会社メディカルAI",
+      "industry": "医療",
+      "use_case": "遠隔診療プラットフォーム",
+      "results": "診療効率40%向上、患者満足度95%"
+    },
+    {
+      "company": "エデュテック株式会社",
+      "industry": "教育",
+      "use_case": "オンライン学習プラットフォーム",
+      "results": "学習継続率80%、コスト削減60%"
+    },
+    {
+      "company": "カスタマーサポート株式会社",
+      "industry": "カスタマーサービス",
+      "use_case": "AIカスタマーサポート",
+      "results": "応答時間90%短縮、顧客満足度20%向上"
+    }
+  ],
+  "roadmap": {
+    "2024_Q1": ["新しいAIモデル対応", "エッジコンピューティング対応"],
+    "2024_Q2": ["3Dアバター機能", "リアルタイム字幕"],
+    "2024_Q3": ["ブロックチェーン統合", "量子暗号化"],
+    "2024_Q4": ["メタバース対応", "脳波インターフェース"]
+  }
+}
