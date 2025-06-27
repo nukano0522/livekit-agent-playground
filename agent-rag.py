@@ -8,7 +8,7 @@ import chromadb
 from openai import OpenAI, AzureOpenAI
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext
+from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, llm
 from livekit.plugins import (
     openai,
     cartesia,
@@ -49,37 +49,61 @@ class RAGAssistant(Agent):
         self.openai_client = openai_client
         self.embedding_model = embedding_model
     
-    async def on_message(self, message: str) -> str:
-        """ユーザーのメッセージを受け取って、ChromaDBで検索してから応答"""
-        if self.chroma_collection:
-            # ユーザーの質問をembeddingに変換
-            response = self.openai_client.embeddings.create(
-                model=self.embedding_model,
-                input=message
-            )
-            query_embedding = response.data[0].embedding
-            
-            # ChromaDBで類似ドキュメントを検索
-            results = self.chroma_collection.query(
-                query_embeddings=[query_embedding],
-                n_results=3
-            )
-            
-            # 検索結果をコンテキストに追加
-            if results['documents'][0]:
-                context = "\n\n関連情報:\n"
-                for i, doc in enumerate(results['documents'][0]):
-                    context += f"\n{i+1}. {doc}\n"
-                
-                # 検索結果を含めたプロンプトを作成
-                enhanced_message = f"{context}\n\nユーザーの質問: {message}"
-                return await super().on_message(enhanced_message)
+    async def on_user_turn_completed(
+        self, turn_ctx: llm.ChatContext, new_message: llm.ChatMessage
+    ) -> None:
+        """ユーザーの発話が完了した際に、ChromaDBで検索を実行し、
+        関連情報をコンテキストに追加する"""
+        print(f"\n[DEBUG] on_user_turn_completed called with: {new_message.content}")
         
-        return await super().on_message(message)
+        if self.chroma_collection and new_message.content:
+            print(f"[DEBUG] ChromaDB collection is available")
+            try:
+                # ユーザーの質問をembeddingに変換
+                user_query = new_message.content
+                print(f"[DEBUG] Creating embedding for query: {user_query}")
+                response = self.openai_client.embeddings.create(
+                    model=self.embedding_model,
+                    input=user_query
+                )
+                query_embedding = response.data[0].embedding
+                print(f"[DEBUG] Embedding created successfully")
+                
+                # ChromaDBで類似ドキュメントを検索
+                print(f"[DEBUG] Searching ChromaDB...")
+                results = self.chroma_collection.query(
+                    query_embeddings=[query_embedding],
+                    n_results=3
+                )
+                print(f"[DEBUG] Search completed. Found {len(results['documents'][0])} results")
+                
+                # 検索結果をコンテキストに追加
+                if results['documents'][0]:
+                    context = "\n\n関連情報:\n"
+                    for i, (doc, distance) in enumerate(zip(results['documents'][0], results['distances'][0])):
+                        print(f"[DEBUG] Result {i+1} (distance: {distance:.4f}): {doc[:100]}...")
+                        context += f"\n{i+1}. {doc}\n"
+                    
+                    # new_messageの内容を更新（検索結果を含めた形に）
+                    enhanced_content = f"{context}\n\nユーザーの質問: {user_query}"
+                    new_message.content = enhanced_content
+                    print(f"[DEBUG] Enhanced message content with search results")
+                else:
+                    print(f"[DEBUG] No search results found")
+            except Exception as e:
+                print(f"[ERROR] Exception in on_user_turn_completed: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"[DEBUG] ChromaDB collection is NOT available or no message content")
+        
+        # 親クラスのメソッドを呼び出す
+        await super().on_user_turn_completed(turn_ctx, new_message)
 
 
 def initialize_chromadb_client():
     """ChromaDBクライアントとOpenAIクライアントを初期化"""
+    print("\n[DEBUG] Initializing ChromaDB client...")
     # ChromaDBクライアントを初期化
     chroma_client = chromadb.PersistentClient(path="./chroma_db")
     
@@ -109,9 +133,26 @@ def initialize_chromadb_client():
     # コレクションを取得
     try:
         collection = chroma_client.get_collection(name="livekit_knowledge")
-        print(f"ChromaDBコレクション 'livekit_knowledge' を読み込みました。ドキュメント数: {collection.count()}")
+        doc_count = collection.count()
+        print(f"[DEBUG] ChromaDBコレクション 'livekit_knowledge' を読み込みました。ドキュメント数: {doc_count}")
+        
+        # テストクエリで動作確認
+        print("[DEBUG] テストクエリを実行中...")
+        test_embedding = openai_client.embeddings.create(
+            model=embedding_model,
+            input="価格を教えてください"
+        ).data[0].embedding
+        
+        test_results = collection.query(
+            query_embeddings=[test_embedding],
+            n_results=3
+        )
+        print(f"[DEBUG] テストクエリ結果: {len(test_results['documents'][0])} 件のドキュメントが見つかりました")
+        for i, doc in enumerate(test_results['documents'][0]):
+            print(f"[DEBUG] テスト結果 {i+1}: {doc[:100]}...")
+            
     except Exception as e:
-        print(f"ChromaDBコレクションの読み込みエラー: {e}")
+        print(f"[ERROR] ChromaDBコレクションの読み込みエラー: {e}")
         print("init_chromadb.pyを実行してデータベースを初期化してください。")
         collection = None
     
