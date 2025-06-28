@@ -1,3 +1,5 @@
+// https://docs.livekit.io/home/quickstarts/react/
+// https://github.com/livekit/components-js/tree/main/packages/react
 import {
   ControlBar,
   RoomAudioRenderer,
