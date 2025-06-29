@@ -1,4 +1,4 @@
 .env
 .venv
 .claude
-chromadb/
+chroma_db/
