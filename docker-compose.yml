@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  livekit:
+    build: 
+      context: .
+      dockerfile: docker/livekit/Dockerfile
+    container_name: livekit-server
+    command: --dev
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    networks:
+      - livekit-network
+
+  agent:
+    build:
+      context: .
+      dockerfile: docker/agent/Dockerfile
+    container_name: livekit-agent
+    env_file: .env
+    environment:
+      - LIVEKIT_URL=ws://livekit:7880
+      - LIVEKIT_API_KEY=devkey
+      - LIVEKIT_API_SECRET=secret
+    # depends_on:
+    #   - livekit
+    networks:
+      - livekit-network
+    volumes:
+      - ./chroma_db:/app/chroma_db
+    restart: unless-stopped
+    # command: >
+    #   sh -c "
+    #     echo 'Waiting for LiveKit server to be ready...' &&
+    #     until nc -z livekit 7880; do
+    #       echo 'LiveKit server not ready yet, waiting...'
+    #       sleep 2
+    #     done &&
+    #     echo 'LiveKit server is ready!' &&
+    #     python agent.py download-files &&
+    #     python agent.py dev
+    #   "
+
+  web-client:
+    build:
+      context: .
+      dockerfile: docker/web-client/Dockerfile
+    container_name: livekit-web-client
+    ports:
+      - "3001:3000"
+    depends_on:
+      - livekit
+    networks:
+      - livekit-network
+    restart: unless-stopped
+
+networks:
+  livekit-network:
+    driver: bridge

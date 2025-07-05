@@ -5,7 +5,6 @@ import {
   RoomAudioRenderer,
   useParticipants,
   useConnectionState,
-  ConnectionState,
   useLocalParticipant,
 } from '@livekit/components-react'
 import { useEffect } from 'react'
@@ -48,7 +47,7 @@ export function VoiceAssistant() {
           ))}
         </div>
 
-        {connectionState === ConnectionState.Connected && participants.length < 2 && (
+        {connectionState === 'connected' && participants.length < 2 && (
           <div className="waiting-message">
             <p>Waiting for agent to join...</p>
           </div>
